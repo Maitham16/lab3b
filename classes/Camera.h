@@ -92,7 +92,7 @@ public:
             double halfHeight = halfWidth * (imgHeight / static_cast<double>(imgWidth));
 
             // Calculate the ray direction
-            Vector3 rayDirection = (direction + (right * (2.0 * halfWidth * (u - 0.5))) + (camUp * (2.0 * halfHeight * (v - 0.5)))).normalize();
+            Vector3 rayDirection = (direction + (right * (2.0 * halfWidth * (u - 0.4))) + (camUp * (2.0 * halfHeight * (v - 0.4)))).normalize();
 
             // Create and return the ray
             return Ray(position, rayDirection);

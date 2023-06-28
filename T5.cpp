@@ -479,7 +479,7 @@ Scene parseScene(const std::string &filename)
 int main()
 {
     // Parse the scene from the XML file
-    Scene scene = parseScene("scenes/example9.xml");
+    Scene scene = parseScene("scenes/example8.xml");
 
     scene.camera.isTransform = false;
 
