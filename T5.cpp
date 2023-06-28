@@ -20,6 +20,7 @@
 #include "classes/RayTrace.h"
 #include "classes/Scene.h"
 #include "classes/render.h"
+#include "classes/Transform.h"
 
 std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
 {
@@ -67,9 +68,55 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
                 sphere.material.transmittance = transmittance;
                 sphere.material.refraction_index = iof;
 
-                // add the sphere to the vector
+                // Parse transformations
+                pugi::xml_node transformNode = node.child("transform");
+                if (transformNode)
+                {
+                    for (auto &&transform : transformNode.children())
+                    {
+                        std::string transformName = transform.name();
+
+                        if (transformName == "translate")
+                        {
+                            double tx = transform.attribute("x").as_double();
+                            double ty = transform.attribute("y").as_double();
+                            double tz = transform.attribute("z").as_double();
+                            // Apply translation
+                            sphere.transform.translate(tx, ty, tz);
+                        }
+                        else if (transformName == "rotateX")
+                        {
+                            double angle = transform.attribute("theta").as_double();
+                            // Apply rotation around X-axis
+                            sphere.transform.rotateX(angle);
+                        }
+                        else if (transformName == "rotateY")
+                        {
+                            double angle = transform.attribute("theta").as_double();
+                            // Apply rotation around Y-axis
+                            sphere.transform.rotateY(angle);
+                        }
+                        else if (transformName == "rotateZ")
+                        {
+                            double angle = transform.attribute("theta").as_double();
+                            // Apply rotation around Z-axis
+                            sphere.transform.rotateZ(angle);
+                        }
+                        else if (transformName == "scale")
+                        {
+                            double sx = transform.attribute("x").as_double();
+                            double sy = transform.attribute("y").as_double();
+                            double sz = transform.attribute("z").as_double();
+                            // Apply scaling
+                            sphere.transform.scale(sx, sy, sz);
+                        }
+                    }
+                }
+
+                // Add the sphere to the vector
                 spheres.push_back(sphere);
-                // console output
+
+                // Console output
                 std::cout << "Sphere: Radius=" << radius << ", Position=(" << x << "," << y << "," << z << ")\n";
             }
             else
@@ -96,9 +143,55 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
                     Vector3 position(x, y, z);
                     Sphere sphere(position, radius, Material(textureName, ka, kd, ks, exponent, reflectance, transmittance, iof));
 
-                    // add the sphere to the vector
+                    // Parse transformations
+                    pugi::xml_node transformNode = node.child("transform");
+                    if (transformNode)
+                    {
+                        for (auto &&transform : transformNode.children())
+                        {
+                            std::string transformName = transform.name();
+
+                            if (transformName == "translate")
+                            {
+                                double tx = transform.attribute("x").as_double();
+                                double ty = transform.attribute("y").as_double();
+                                double tz = transform.attribute("z").as_double();
+                                // Apply translation
+                                sphere.transform.translate(tx, ty, tz);
+                            }
+                            else if (transformName == "rotateX")
+                            {
+                                double angle = transform.attribute("theta").as_double();
+                                // Apply rotation around X-axis
+                                sphere.transform.rotateX(angle);
+                            }
+                            else if (transformName == "rotateY")
+                            {
+                                double angle = transform.attribute("theta").as_double();
+                                // Apply rotation around Y-axis
+                                sphere.transform.rotateY(angle);
+                            }
+                            else if (transformName == "rotateZ")
+                            {
+                                double angle = transform.attribute("theta").as_double();
+                                // Apply rotation around Z-axis
+                                sphere.transform.rotateZ(angle);
+                            }
+                            else if (transformName == "scale")
+                            {
+                                double sx = transform.attribute("x").as_double();
+                                double sy = transform.attribute("y").as_double();
+                                double sz = transform.attribute("z").as_double();
+                                // Apply scaling
+                                sphere.transform.scale(sx, sy, sz);
+                            }
+                        }
+                    }
+
+                    // Add the sphere to the vector
                     spheres.push_back(sphere);
-                    // console output
+
+                    // Console output
                     std::cout << "Sphere: Radius=" << radius << ", Position=(" << x << "," << y << "," << z << ")\n";
                 }
                 else
@@ -110,11 +203,6 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
         }
     }
 
-    if (spheres.empty())
-    {
-        // console output
-        std::cout << "No spheres parsed." << std::endl;
-    }
     return spheres;
 }
 
@@ -162,6 +250,48 @@ Material parseTexturedMaterial(const pugi::xml_node &materialNode)
     return Material(textureName, ka, kd, ks, exponent, reflectance, transmittance, iof);
 }
 
+Transform parseTransform(const pugi::xml_node &transformNode)
+{
+    Transform transform;
+
+    for (auto &&node : transformNode.children())
+    {
+        std::string nodeName = node.name();
+
+        if (nodeName == "translate")
+        {
+            double x = node.attribute("x").as_double();
+            double y = node.attribute("y").as_double();
+            double z = node.attribute("z").as_double();
+            transform.translate(x, y, z);
+        }
+        else if (nodeName == "rotateX")
+        {
+            double theta = node.attribute("theta").as_double();
+            transform.rotateX(theta);
+        }
+        else if (nodeName == "rotateY")
+        {
+            double theta = node.attribute("theta").as_double();
+            transform.rotateY(theta);
+        }
+        else if (nodeName == "rotateZ")
+        {
+            double theta = node.attribute("theta").as_double();
+            transform.rotateZ(theta);
+        }
+        else if (nodeName == "scale")
+        {
+            double x = node.attribute("x").as_double();
+            double y = node.attribute("y").as_double();
+            double z = node.attribute("z").as_double();
+            transform.scale(x, y, z);
+        }
+    }
+
+    return transform;
+}
+
 std::vector<Model> parseModels(const pugi::xml_node &surfacesNode)
 {
     std::vector<Model> models;
@@ -178,6 +308,15 @@ std::vector<Model> parseModels(const pugi::xml_node &surfacesNode)
                 // Parse solid material
                 Material material = parseSolidMaterial(materialNode);
                 Model model(meshName, material);
+
+                // Parse transform
+                pugi::xml_node transformNode = node.child("transform");
+                if (transformNode)
+                {
+                    Transform transform = parseTransform(transformNode);
+                    model.setTransform(transform);
+                }
+
                 models.push_back(model);
             }
             else
@@ -187,10 +326,18 @@ std::vector<Model> parseModels(const pugi::xml_node &surfacesNode)
                 Material material = parseTexturedMaterial(materialNode);
                 Model model(meshName, material);
                 models.push_back(model);
-            }
 
-            // console output
-            std::cout << "Model: Name=" << meshName << "\n";
+                // Parse transform
+                pugi::xml_node transformNode = node.child("transform");
+                if (transformNode)
+                {
+                    Transform transform = parseTransform(transformNode);
+                    model.setTransform(transform);
+                }
+                // console output
+                std::cout << "Model: Name=" << meshName << std::endl;
+                models.push_back(model);
+            }
         }
     }
 
@@ -332,7 +479,7 @@ Scene parseScene(const std::string &filename)
 int main()
 {
     // Parse the scene from the XML file
-    Scene scene = parseScene("scenes/example8.xml");
+    Scene scene = parseScene("scenes/example9.xml");
 
     scene.camera.isTransform = false;
 

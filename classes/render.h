@@ -18,7 +18,11 @@
 void render(const Scene& scene, const Camera& camera) {
     const int width = camera.imgWidth;
     const int height = camera.imgHeight;
-    Vector3 image[width][height];
+    Vector3** image = new Vector3*[width];
+
+    for (int i = 0; i < width; ++i) {
+        image[i] = new Vector3[height];
+    }
 
     for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
@@ -28,7 +32,8 @@ void render(const Scene& scene, const Camera& camera) {
             image[i][j] = ray_trace(ray, scene, camera);
         }
     }
-// write to file
+
+    // Write to file
     std::ofstream ofs;
     ofs.open("./out.ppm");
     ofs << "P3\n" << width << " " << height << "\n255\n";
@@ -41,7 +46,12 @@ void render(const Scene& scene, const Camera& camera) {
         }
     }
     ofs.close();
-}
 
+    // Clean up memory
+    for (int i = 0; i < width; ++i) {
+        delete[] image[i];
+    }
+    delete[] image;
+}
 
 #endif

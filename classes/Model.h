@@ -12,6 +12,7 @@
 #include "Vector2.h"
 #include "Material.h"
 #include "Texture.h"
+#include "Transform.h"
 
 class Model
 {
@@ -20,6 +21,7 @@ public:
     std::vector<Vector2> textures;
     std::vector<Vector3> normals;
     std::vector<Triangle> triangles;
+    Transform transform;
 
     Model(const std::string &filename, const Material &material)
     {
@@ -29,7 +31,7 @@ public:
             std::cerr << "Cannot open " << filename << std::endl;
             exit(1);
         }
-        
+
         std::string line;
         while (std::getline(in, line))
         {
@@ -92,6 +94,16 @@ public:
                 }
             }
         }
+    }
+
+    const Transform &getTransform() const
+    {
+        return transform;
+    }
+
+    void setTransform(const Transform &transform)
+    {
+        this->transform = transform;
     }
 };
 

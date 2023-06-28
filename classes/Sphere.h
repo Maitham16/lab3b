@@ -6,6 +6,7 @@
 #include "Vector3.h"
 #include "Ray.h"
 #include "Material.h"
+#include "Transform.h"
 
 class Sphere
 {
@@ -13,6 +14,7 @@ public:
     Vector3 center;
     float radius;
     Material material;
+    Transform transform;
 
     Sphere(const Vector3 &center, float radius, const Material &material)
         : center(center), radius(radius), material(material) {}
@@ -62,6 +64,16 @@ public:
     Material get_material() const
     {
         return material;
+    }
+
+    const Transform &getTransform() const
+    {
+        return transform;
+    }
+
+    void setTransform(const Transform &transform)
+    {
+        this->transform = transform;
     }
 };
 
