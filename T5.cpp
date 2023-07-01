@@ -479,9 +479,11 @@ Scene parseScene(const std::string &filename)
 int main()
 {
     // Parse the scene from the XML file
-    Scene scene = parseScene("scenes/example8.xml");
+    Scene scene = parseScene("scenes/example7.xml");
 
-    scene.camera.isTransform = false;
+    scene.camera.transform.makeTranslation(-1.0, 2.0, 1);
+
+    scene.camera.isTransform = true;
 
     // Render the scene with the parsed camera
     render(scene, scene.camera);
