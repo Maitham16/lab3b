@@ -63,6 +63,19 @@ public:
     {
         return (1 - u - v) * n0 + u * n1 + v * n2;
     }
+
+Vector2 textureCoordinates(float a, float b) const {
+    // Use barycentric interpolation for triangle texture mapping
+    float u = (1 - a - b) * t0.x + a * t1.x + b * t2.x;
+    float v = (1 - a - b) * t0.y + a * t1.y + b * t2.y;
+
+    // Apply interpolation to the texture coordinates
+    u = interpolate(u);
+    v = interpolate(v);
+
+    return Vector2(u, v);
+}
+
 };
 
 #endif

@@ -3,6 +3,12 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <limits>
+#include <random>
+#include <algorithm>
+
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Color.h"
@@ -14,6 +20,8 @@ public:
     std::string filename;
     Vector2 dimensions;
     Vector3 *data;
+    int width;
+    int height;
 
     Texture(const std::string &filename)
         : filename(filename), dimensions(Vector2(0.0, 0.0)), data(nullptr)
@@ -52,6 +60,9 @@ public:
         }
 
         stbi_image_free(imageData);
+        // Set the width and height
+        width = width;
+        height = height;
     }
 
     Vector3 sample(const Vector2 &texCoords) const
@@ -85,7 +96,7 @@ public:
         return (data != nullptr && dimensions.x > 0 && dimensions.y > 0);
     }
 
-// getWidth and getHeight functions
+    // getWidth and getHeight functions
     float getWidth() const
     {
         return dimensions.x;
@@ -94,6 +105,22 @@ public:
     float getHeight() const
     {
         return dimensions.y;
+    }
+
+    Vector3 sampleSuper(const Vector2 &texCoords, int sampleCount) const
+    {
+        Vector3 sum(0.0f, 0.0f, 0.0f);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(0.0, 1.0);
+        for (int i = 0; i < sampleCount; ++i)
+        {
+            // Jitter the texture coordinates by a random offset within a pixel
+            Vector2 jitter(dis(gen) / width, dis(gen) / height);
+            Vector2 sampleCoords = texCoords + jitter;
+            sum = sum + sample(sampleCoords);
+        }
+        return sum / float(sampleCount); // Average the samples
     }
 
 private:

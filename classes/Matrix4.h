@@ -131,6 +131,17 @@ public:
         result.w = mat[3][0] * v.x + mat[3][1] * v.y + mat[3][2] * v.z + mat[3][3] * v.w;
         return result;
     }
+
+    // operand types are: const Matrix4 * Vector3
+    Vector3 operator*(const Vector3 &v) const
+    {
+        Vector3 result;
+        // Modify this code based on your Matrix4 internal structure
+        result.x = mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z;
+        result.y = mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z;
+        result.z = mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z;
+        return result;
+    }
 };
 
 #endif

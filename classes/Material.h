@@ -21,6 +21,7 @@ struct Material
   float transmittance;
   float refraction_index;
   Texture *texture;
+  Texture *bumpMap;
 
   Material(const Vector3 &color = Vector3(1.0, 1.0, 1.0), float ka = 0.3,
            float kd = 0.9, float ks = 1.0, float exponent = 200.0,
@@ -65,8 +66,43 @@ struct Material
 
     return Vector2(u, v);
   }
+
+  Vector3 bumpNormal(const Vector3 &position, const Vector3 &normal) const
+  {
+    if (bumpMap && bumpMap->isValid())
+    {
+      Vector2 texCoords = textureCoordinates(position);
+
+      // Sample the bump map gradient in the U and V directions
+      float bumpU = bumpMap->sample(Vector2(texCoords.x + 0.001f, texCoords.y)).x - bumpMap->sample(texCoords).x;
+      float bumpV = bumpMap->sample(Vector2(texCoords.x, texCoords.y + 0.001f)).x - bumpMap->sample(texCoords).x;
+
+      Vector3 tangent, bitangent;
+      getTangentSpace(position, tangent, bitangent);
+
+      // Perturb the normal based on the bump map gradient in the tangent space
+      Vector3 perturbedNormal = normal + tangent * bumpU + bitangent * bumpV;
+      return perturbedNormal.normalized();
+    }
+    else
+    {
+      return normal;
+    }
+  }
+
+  void getTangentSpace(const Vector3 &position, Vector3 &tangent, Vector3 &bitangent) const
+  {
+    // The tangent is aligned with the U texture coordinate
+    Vector3 tangentDirection(1.0f, 0.0f, 0.0f);
+
+    // The bitangent is aligned with the V texture coordinate
+    Vector3 bitangentDirection(0.0f, 1.0f, 0.0f);
+
+    // Transform the tangent and bitangent to world space
+    // Here we'll just assume they're already in world space
+    tangent = tangentDirection;
+    bitangent = bitangentDirection;
+  }
 };
-
-
 
 #endif

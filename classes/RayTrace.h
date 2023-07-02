@@ -62,11 +62,14 @@ Vector3 ray_trace(const Ray &ray, const Scene &scene, const Camera &camera, int 
             }
 
             // Diffuse shading
-            float diffuse_factor = std::max(0.0f, normal.dot(light_dir));
+            Vector3 bumpedNormal = hit_material.bumpNormal(point, normal);
+            float diffuse_factor = std::max(0.0f, bumpedNormal.dot(light_dir));
+            Vector3 reflect_dir = reflect(-light_dir, bumpedNormal);
+
             Vector3 diffuse_color = hit_material.color * hit_material.kd * diffuse_factor;
 
             // Specular shading
-            Vector3 reflect_dir = reflect(-light_dir, normal);
+
             Vector3 view_dir = (camera.position - point).normalized();
             float spec_factor = std::pow(std::max(0.0f, reflect_dir.dot(view_dir)), hit_material.exponent);
             Vector3 specular_color = hit_material.ks * light.intensity * spec_factor;
@@ -109,7 +112,7 @@ Vector3 ray_trace(const Ray &ray, const Scene &scene, const Camera &camera, int 
             Vector2 texCoords = hit_material.textureCoordinates(point);
 
             // Sample the texture color at the texture coordinates
-            Vector3 texture_color = hit_material.texture->sample(texCoords);
+            Vector3 texture_color = hit_material.texture->sampleSuper(texCoords, 4);
 
             // Apply the texture color to the material color
             color = color * texture_color;

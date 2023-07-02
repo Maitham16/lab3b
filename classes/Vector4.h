@@ -172,6 +172,12 @@ public:
         this->z = v.z;
         this->w = w;
     }
+
+    // xyz
+    Vector3 xyz() const
+    {
+        return Vector3(x, y, z);
+    }
 };
 
 #endif

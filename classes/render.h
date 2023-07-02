@@ -31,10 +31,26 @@ void renderRegion(const Scene& scene, const Camera& camera, Vector3* image, int 
     {
         for (int i = startX; i < endX; ++i)
         {
-            float u = float(i) / float(width);
-            float v = float(j) / float(camera.imgHeight);
-            Ray ray = camera.generateRay(u, v);
-            image[j * width + i] = ray_trace(ray, scene, camera);
+            Vector3 colorSum(0.0f, 0.0f, 0.0f);
+
+            // Supersampling over 2x2 grid
+            for (int dy = 0; dy < 2; ++dy)
+            {
+                for (int dx = 0; dx < 2; ++dx)
+                {
+                    // Compute primary ray direction with offset for supersampling
+                    float u = (i + (dx - 0.5f) / 2.0f) / width;
+                    float v = (j + (dy - 0.5f) / 2.0f) / camera.imgHeight;
+                    Ray ray = camera.generateRay(u, v);
+
+                    // Cast ray and accumulate color
+                    colorSum = colorSum + ray_trace(ray, scene, camera);
+                }
+            }
+
+            // Average color and store in image
+            Vector3 colorAvg = colorSum / 4.0f;
+            image[j * width + i] = colorAvg;
         }
 
         renderedLines++;
@@ -50,6 +66,7 @@ void renderRegion(const Scene& scene, const Camera& camera, Vector3* image, int 
     // Update the overall progress
     progress += totalLines;
 }
+
 
 void render(const Scene& scene, const Camera& camera)
 {
