@@ -15,11 +15,6 @@
 #include "Material.h"
 #include "Light.h"
 
-float clamp(float val, float min, float max)
-{
-    return std::max(min, std::min(max, val));
-}
-
 Vector3 ray_trace(const Ray &ray, const Scene &scene, const Camera &camera, int depth = 0)
 {
     if (depth > camera.maxBounce)
@@ -105,6 +100,53 @@ Vector3 ray_trace(const Ray &ray, const Scene &scene, const Camera &camera, int 
 
         // Calculate the final color using reflection and refraction
         color = (color * (1.0f - hit_material.reflectance - hit_material.transmittance)) + (reflected_color * hit_material.reflectance) + (refracted_color * hit_material.transmittance);
+
+        for (const Spotlight &spotlight : scene.spotlights)
+        {
+            Vector3 light_dir = (spotlight.position - point).normalized();
+
+            // Check if the point is within the cone of the spotlight
+            float angle = acos(light_dir.dot(spotlight.direction.normalized()));
+            if (angle > spotlight.angle)
+            {
+                // The point is outside the cone of the spotlight, so this spotlight does not contribute to the lighting of the point
+                continue;
+            }
+
+            // Compute falloff
+            float falloff = pow(clamp((1.0 - angle / spotlight.angle), 0.0, 1.0), spotlight.falloffExponent);
+
+            // Shadow ray direction
+            Vector3 shadow_dir = light_dir;
+
+            // Shadow ray origin with bias
+            Vector3 shadow_origin = point + shadow_dir * 0.001f;
+
+            // Shadow ray
+            Ray shadow_ray(shadow_origin, shadow_dir);
+
+            // Check for shadows
+            float shadow_t = std::numeric_limits<float>::max();
+            Vector3 shadow_point, shadow_normal;
+            Material shadow_material;
+
+            if (scene.intersect(shadow_ray, shadow_t, shadow_point, shadow_normal, shadow_material))
+            {
+                continue;
+            }
+
+            // Compute lighting from spotlight
+            Vector3 view_dir = (camera.position - point).normalized();
+            Vector3 spotlight_color = scene.computeLighting(point, normal, view_dir, hit_material.exponent);
+
+            // Attenuation
+            float distance = (spotlight.position - point).length();
+            float attenuation = 1.0 / (1.0 + hit_material.ka * distance);
+
+            // Accumulate color with falloff and attenuation
+            color = color + spotlight_color * spotlight.intensity * falloff * attenuation;
+        }
+
         // Texture mapping
         if (hit_material.texture && hit_material.texture->isValid()) // Check if the texture is valid
         {

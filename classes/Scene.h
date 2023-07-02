@@ -6,6 +6,7 @@
 #include "Light.h"
 #include "Model.h"
 #include "Camera.h"
+#include "Spotlight.h"
 
 class Scene
 {
@@ -13,31 +14,37 @@ public:
     std::vector<Sphere> spheres;
     std::vector<Light> lights;
     std::vector<Model> models;
+    std::vector<Spotlight> spotlights;
     Camera camera;
 
-    void add(const Sphere& sphere)
+    void add(const Sphere &sphere)
     {
         spheres.push_back(sphere);
     }
 
-    void add(const Light& light)
+    void add(const Light &light)
     {
         lights.push_back(light);
     }
 
-    void add(const Model& model)
+    void add(const Model &model)
     {
         models.push_back(model);
     }
 
-    void setCamera(const Camera& cam)
+    void setCamera(const Camera &cam)
     {
         camera = cam;
     }
 
-    bool intersect(const Ray& ray, float& t, Vector3& point, Vector3& normal, Material& material) const
+    void addSpotlight(const Spotlight &spotlight)
     {
-        for (const auto& sphere : spheres)
+        spotlights.push_back(spotlight);
+    }
+
+    bool intersect(const Ray &ray, float &t, Vector3 &point, Vector3 &normal, Material &material) const
+    {
+        for (const auto &sphere : spheres)
         {
             float t_sphere;
             if (sphere.intersect(ray, t_sphere))
@@ -51,9 +58,9 @@ public:
                 }
             }
         }
-        for (const auto& model : models)
+        for (const auto &model : models)
         {
-            for (const auto& triangle : model.triangles)
+            for (const auto &triangle : model.triangles)
             {
                 float t_triangle, u, v;
                 if (triangle.intersect(ray, 0.001f, std::numeric_limits<float>::max(), t_triangle, u, v))
@@ -69,6 +76,31 @@ public:
             }
         }
         return t < std::numeric_limits<float>::max();
+    }
+
+    Vector3 computeLighting(const Vector3 &point, const Vector3 &normal, const Vector3 &viewDirection, double specular) const
+    {
+        Vector3 result = Vector3(0, 0, 0);
+        for (const Spotlight &spotlight : spotlights)
+        {
+            Vector3 lightColor = spotlight.getLighting(point);
+            // Incorporate the effects of this light into the overall lighting
+            // This code will depend on your specific shading model
+            // For example, using the Phong reflection model, it might look something like this:
+            Vector3 lightDirection = (spotlight.position - point).normalize();
+            double cosTheta = normal.dot(lightDirection);
+            if (cosTheta > 0)
+            {
+                result += lightColor * cosTheta; // Diffuse term
+                Vector3 reflectionDirection = (2 * cosTheta * normal - lightDirection).normalize();
+                double cosAlpha = viewDirection.dot(reflectionDirection);
+                if (cosAlpha > 0)
+                {
+                    result += lightColor * pow(cosAlpha, specular); // Specular term
+                }
+            }
+        }
+        return result;
     }
 };
 

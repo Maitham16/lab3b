@@ -1,3 +1,4 @@
+// Maitham Al-rubaye - A12142043 - Lab 3B - main function
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -21,7 +22,10 @@
 #include "classes/Scene.h"
 #include "classes/render.h"
 #include "classes/Transform.h"
+#include "classes/Spotlight.h"
 
+// Parse the XML file
+// Sphere parsing
 std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
 {
     std::vector<Sphere> spheres;
@@ -116,7 +120,7 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
                 // Add the sphere to the vector
                 spheres.push_back(sphere);
 
-                // Console output
+                // Console checking
                 std::cout << "Sphere: Radius=" << radius << ", Position=(" << x << "," << y << "," << z << ")\n";
             }
             else
@@ -191,13 +195,8 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
                     // Add the sphere to the vector
                     spheres.push_back(sphere);
 
-                    // Console output
+                    // Console checking
                     std::cout << "Sphere: Radius=" << radius << ", Position=(" << x << "," << y << "," << z << ")\n";
-                }
-                else
-                {
-                    // No valid material found
-                    std::cerr << "Error: Invalid material for sphere at position (" << x << ", " << y << ", " << z << "). Skipping sphere." << std::endl;
                 }
             }
         }
@@ -206,6 +205,7 @@ std::vector<Sphere> parseSpheres(const pugi::xml_node &surfacesNode)
     return spheres;
 }
 
+// Parse Material Solid
 Material parseSolidMaterial(const pugi::xml_node &materialNode)
 {
     pugi::xml_node colorNode = materialNode.child("color");
@@ -227,6 +227,7 @@ Material parseSolidMaterial(const pugi::xml_node &materialNode)
     return Material(Vector3(r, g, b), ka, kd, ks, exponent, reflectance, transmittance, iof);
 }
 
+// Parse Material Textured
 Material parseTexturedMaterial(const pugi::xml_node &materialNode)
 {
     pugi::xml_node textureNode = materialNode.child("texture");
@@ -243,13 +244,14 @@ Material parseTexturedMaterial(const pugi::xml_node &materialNode)
     pugi::xml_node refractionNode = materialNode.child("refraction");
     double iof = refractionNode.attribute("iof").as_double();
 
-    // console check
+    // console checking
     std::cout << "Texture: " << textureName << std::endl;
     std::cout << "Phong: ka=" << ka << ", kd=" << kd << ", ks=" << ks << ", exponent=" << exponent << std::endl;
 
     return Material(textureName, ka, kd, ks, exponent, reflectance, transmittance, iof);
 }
 
+// Parse Transformations
 Transform parseTransform(const pugi::xml_node &transformNode)
 {
     Transform transform;
@@ -292,6 +294,7 @@ Transform parseTransform(const pugi::xml_node &transformNode)
     return transform;
 }
 
+// Parse Model (surface - mesh)
 std::vector<Model> parseModels(const pugi::xml_node &surfacesNode)
 {
     std::vector<Model> models;
@@ -334,19 +337,12 @@ std::vector<Model> parseModels(const pugi::xml_node &surfacesNode)
                     Transform transform = parseTransform(transformNode);
                     model.setTransform(transform);
                 }
-                // console output
+                // console checking
                 std::cout << "Model: Name=" << meshName << std::endl;
                 models.push_back(model);
             }
         }
     }
-
-    if (models.empty())
-    {
-        // console output
-        std::cout << "No models parsed." << std::endl;
-    }
-
     return models;
 }
 
@@ -370,7 +366,7 @@ std::vector<Light> parseLights(const pugi::xml_node &lightsNode)
 
             // add the light to the vector
             lights.push_back(light);
-            // console output
+            // console checking
             std::cout << "Ambient Light: Color=(" << r << "," << g << "," << b << ")\n";
         }
         else if (std::string(node.name()) == "point_light")
@@ -391,15 +387,9 @@ std::vector<Light> parseLights(const pugi::xml_node &lightsNode)
 
             // add the light to the vector
             lights.push_back(light);
-            // console output
+            // console checking
             std::cout << "Point Light: Color=(" << r << "," << g << "," << b << "), Position=(" << x << "," << y << "," << z << ")\n";
         }
-    }
-
-    if (lights.empty())
-    {
-        // console output
-        std::cout << "No lights parsed." << std::endl;
     }
     return lights;
 }
@@ -426,6 +416,7 @@ Camera parseCamera(const pugi::xml_node &cameraNode)
     double vertical = resolutionNode.attribute("vertical").as_double();
     pugi::xml_node max_bouncesNode = cameraNode.child("max_bounces");
     double max_bounces = max_bouncesNode.attribute("n").as_double();
+
     // save the attributes to the camera
     Camera camera;
     camera.position = Vector3(x, y, z);
@@ -439,6 +430,7 @@ Camera parseCamera(const pugi::xml_node &cameraNode)
     return camera;
 }
 
+// scene parsing function
 Scene parseScene(const std::string &filename)
 {
     pugi::xml_document doc;
@@ -469,24 +461,46 @@ Scene parseScene(const std::string &filename)
 
     Scene scene;
     scene.spheres = spheres;
-    scene.models = models; // Add this line
+    scene.models = models;
     scene.lights = lights;
     scene.camera = camera;
 
     return scene;
 }
 
+//  main function
 int main()
 {
-    // Parse the scene from the XML file
-    Scene scene = parseScene("scenes/example8.xml");
+    // Prompt the user to enter the file number
+    int fileNumber;
+    std::cout << "Enter the file number (1-9): ";
+    std::cin >> fileNumber;
 
-    scene.camera.transform.makeTranslation(-1.0, 2.0, 1.0);
+    // Construct the file name
+    std::stringstream fileNameStream;
+    fileNameStream << "scenes/example" << fileNumber << ".xml";
+    std::string fileName = fileNameStream.str();
+
+    // Parse the scene from the XML file
+    Scene scene = parseScene(fileName);
+
+    scene.camera.transform.makeTranslation(-1.0, 1.0, 3.0);
 
     scene.camera.isTransform = true;
-    // scene.camera.enableDepthOfField = false;
+    scene.camera.dof = false;
 
-    // Render the scene with the parsed camera
+    // Create a spotlight
+    Vector3 position(0.0, 3.0, -3.0);
+    Vector3 direction = (scene.spheres[0].center - position).normalized();
+    double angle = 10.0;
+    Vector3 color(0.7, 0.7, 0.7);
+    double intensity = 10.0;
+    double falloffExponent = 2.0;
+
+    Spotlight spotlight(position, direction, angle, color, intensity, falloffExponent);
+    scene.addSpotlight(spotlight);
+
+    // Render the scene to an image
     render(scene, scene.camera);
 
     return 0;
