@@ -1,3 +1,4 @@
+// camera header class
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -14,15 +15,16 @@ public:
     Vector3 lookAt;
     Vector3 up;
     double fov;
-    double aperture;      // New parameter
-    double focusDistance; // New parameter
+    double aperture;
+    double focusDistance;
     int imgWidth;
     int imgHeight;
     int maxBounce;
     Matrix4 transform;
     bool isTransform;
-    bool dof; // Parameter to enable/disable DOF
+    bool dof;
 
+    // Constructor
     Camera()
     {
         position = Vector3(0, 0, 0);
@@ -38,6 +40,7 @@ public:
         dof = false;
     }
 
+    //  Constructor with parameters
     Camera(Vector3 position, Vector3 lookAt, Vector3 up, double fov, double aperture, double focusDistance, int imgWidth, int imgHeight, int maxBounce, bool isTransform, bool dof)
     {
         this->position = position;
@@ -53,9 +56,12 @@ public:
         this->dof = dof;
     }
 
+    // Generate ray function
     Ray generateRay(double u, double v) const
     {
         Vector3 lensPosition;
+
+        // Check if depth of field is enabled (filter of camera lens)
         if (dof)
         {
             double lensRadius = aperture / 1.0;
@@ -64,13 +70,15 @@ public:
             double lensY = lensRadius * sqrt(r1) * sin(2 * M_PI * r2);
             lensPosition = Vector3(lensX, lensY, 0);
 
-            if (isTransform) // Check if the camera transformation is enabled
+            // Check if transformation is enabled
+            if (isTransform)
             {
-                // Compute transformation matrix
+                // parameters for transformation
                 Vector3 forward = (this->lookAt - this->position).normalize();
                 Vector3 right = forward.cross(this->up).normalize();
                 Vector3 upNew = right.cross(forward).normalize();
 
+                // Compute transformation matrix (translation and rotation)
                 Matrix4 translationMatrix;
                 translationMatrix.makeTranslation(-position.x, -position.y, -position.z);
 
@@ -94,16 +102,16 @@ public:
             }
             else
             {
-                // Calculate the direction vector based on the camera's position, lookAt, and up vectors
+                // parameters for the direction vector based on the camera's position, lookAt, and up vectors
                 Vector3 direction = (lookAt - position).normalize();
 
-                // Calculate the right vector
+                // parameter of the right vector
                 Vector3 right = direction.cross(up).normalize();
 
-                // Calculate the up vector
+                // parameter of the up vector
                 Vector3 camUp = right.cross(direction).normalize();
 
-                // Calculate the field of view half-angles
+                // parameters of the field of view half-angles
                 double theta = fov;
                 double halfWidth = std::tan(theta / 2.0);
                 double halfHeight = halfWidth * (imgHeight / static_cast<double>(imgWidth));
@@ -117,13 +125,15 @@ public:
             }
         }
 
+        // Check if transformation is enabled without camera lens
         if (isTransform)
         {
-            // Compute transformation matrix
+            // parameters for transformation
             Vector3 forward = (this->lookAt - this->position).normalize();
             Vector3 right = forward.cross(this->up).normalize();
             Vector3 upNew = right.cross(forward).normalize();
 
+            // Compute transformation matrix (translation and rotation)
             Matrix4 translationMatrix;
             translationMatrix.makeTranslation(-position.x, -position.y, -position.z);
 
@@ -141,32 +151,31 @@ public:
             Vector4 rayOriginWorldSpace = transform * Vector4(rayOriginCameraSpace, 1.0);
             Vector4 rayDirectionWorldSpace = transform * Vector4(rayDirectionCameraSpace, 0.0);
 
-            Vector3 offset = lensPosition * focusDistance;
-            Vector3 target = Vector3(rayDirectionWorldSpace.x, rayDirectionWorldSpace.y, rayDirectionWorldSpace.z) * focusDistance;
-            return Ray(Vector3(rayOriginWorldSpace.x, rayOriginWorldSpace.y, rayOriginWorldSpace.z) + offset, (target - offset).normalize());
+            // Create and return the ray
+            return Ray(Vector3(rayOriginWorldSpace.x, rayOriginWorldSpace.y, rayOriginWorldSpace.z), Vector3(rayDirectionWorldSpace.x, rayDirectionWorldSpace.y, rayDirectionWorldSpace.z).normalize());
         }
         else
         {
-            // Calculate the direction vector based on the camera's position, lookAt, and up vectors
+
+            //  parameters for the direction vector based on the camera's position, lookAt, and up vectors
             Vector3 direction = (lookAt - position).normalize();
 
-            // Calculate the right vector
+            //  parameter of the right vector
             Vector3 right = direction.cross(up).normalize();
 
-            // Calculate the up vector
+            //  parameter of the up vector
             Vector3 camUp = right.cross(direction).normalize();
 
-            // Calculate the field of view half-angles
+            //  parameters of the field of view half-angles
             double theta = fov;
             double halfWidth = std::tan(theta / 1.0);
             double halfHeight = halfWidth * (imgHeight / static_cast<double>(imgWidth));
 
-            // Calculate the ray direction
+            //  Calculate the ray direction
             Vector3 rayDirection = (direction + (right * (2.0 * halfWidth * (u - 0.5))) + (camUp * (2.0 * halfHeight * (v - 0.5)))).normalize();
 
-            Vector3 offset = lensPosition * focusDistance;
-            Vector3 target = rayDirection * focusDistance;
-            return Ray(position + offset, (target - offset).normalize());
+            // Create and return the ray
+            return Ray(position, rayDirection);
         }
     }
 };

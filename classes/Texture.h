@@ -1,3 +1,4 @@
+// texture header class
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
@@ -11,7 +12,6 @@
 
 #include "Vector2.h"
 #include "Vector3.h"
-#include "Color.h"
 #include <stb_image.h>
 
 class Texture
@@ -29,9 +29,15 @@ public:
         load();
     }
 
+    ~Texture()
+    {
+        if (data != nullptr)
+            delete[] data;
+    }
+
+    // texture load function
     void load()
     {
-        // Load the texture data from the specified file using stb_image library
         int width, height, numChannels;
         unsigned char *imageData = stbi_load(filename.c_str(), &width, &height, &numChannels, 0);
         if (imageData == nullptr)
@@ -42,7 +48,7 @@ public:
 
         dimensions = Vector2(static_cast<float>(width), static_cast<float>(height));
 
-        // Allocate memory for the texture data and populate it with the loaded data
+        // Allocate memory for the texture data
         data = new Vector3[width * height];
         for (int y = 0; y < height; ++y)
         {
@@ -61,13 +67,13 @@ public:
 
         stbi_image_free(imageData);
         // Set the width and height
-        width = width;
-        height = height;
+        this->width = width;
+        this->height = height;
     }
 
+    // texture sample function (bilinear interpolation)
     Vector3 sample(const Vector2 &texCoords) const
     {
-        // Sample the texture at the specified texture coordinates using bilinear interpolation
         float x = texCoords.x * dimensions.x;
         float y = texCoords.y * dimensions.y;
 
@@ -90,9 +96,9 @@ public:
         return lerp(c0, c1, dy);
     }
 
+    // texture check if valid function
     bool isValid() const
     {
-        // Return true if the texture is valid and loaded, false otherwise
         return (data != nullptr && dimensions.x > 0 && dimensions.y > 0);
     }
 
@@ -107,6 +113,7 @@ public:
         return dimensions.y;
     }
 
+    // texture sample super function (supersampling) for antialiasing
     Vector3 sampleSuper(const Vector2 &texCoords, int sampleCount) const
     {
         Vector3 sum(0.0f, 0.0f, 0.0f);
@@ -115,21 +122,19 @@ public:
         std::uniform_real_distribution<> dis(0.0, 1.0);
         for (int i = 0; i < sampleCount; ++i)
         {
-            // Jitter the texture coordinates by a random offset within a pixel
             Vector2 jitter(dis(gen) / width, dis(gen) / height);
             Vector2 sampleCoords = texCoords + jitter;
             sum = sum + sample(sampleCoords);
         }
-        return sum / float(sampleCount); // Average the samples
+        return sum / float(sampleCount);
     }
 
-private:
+    // texture getColor function
     Vector3 getColor(int x, int y) const
     {
-        // Check if the indices are within the valid range
         if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
         {
-            // Return a default color if the indices are out of bounds
+            // Out of bounds return black
             return Vector3(0.0f, 0.0f, 0.0f);
         }
 
@@ -137,6 +142,7 @@ private:
         return data[index];
     }
 
+    // texture lerp function (linear interpolation)
     Vector3 lerp(const Vector3 &a, const Vector3 &b, float t) const
     {
         return a * (1.0f - t) + b * t;

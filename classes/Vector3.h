@@ -40,7 +40,7 @@ public:
     // operand types are: double * Vector3
     friend Vector3 operator*(float f, const Vector3 &v) { return Vector3(f * v.x, f * v.y, f * v.z); }
 
-    // reflect(-light_dir, normal);
+   // friend function for reflection (friend because it needs access to private members)
     friend Vector3 reflect(const Vector3 &incident, const Vector3 &normal)
     {
         return incident - 2.0f * incident.dot(normal) * normal;
@@ -75,7 +75,7 @@ public:
 
         if (k < 0)
         {
-            return Vector3(0.0, 0.0, 0.0); // Total internal reflection
+            return Vector3(0.0, 0.0, 0.0);
         }
         else
         {

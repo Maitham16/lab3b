@@ -1,3 +1,4 @@
+// header for render function
 #ifndef RENDER_H
 #define RENDER_H
 
@@ -21,11 +22,11 @@
 // Define the number of threads to use
 const int numThreads = 16;
 
-void renderRegion(const Scene& scene, const Camera& camera, Vector3* image, int startX, int startY, int endX, int endY, int width, std::atomic<int>& progress)
+void renderRegion(const Scene &scene, const Camera &camera, Vector3 *image, int startX, int startY, int endX, int endY, int width, std::atomic<int> &progress)
 {
     int totalLines = endY - startY;
     int renderedLines = 0;
-    int updateThreshold = totalLines / 10; // Print progress every 10% of the region
+    int updateThreshold = totalLines / 10;
 
     for (int j = startY; j < endY; ++j)
     {
@@ -67,12 +68,11 @@ void renderRegion(const Scene& scene, const Camera& camera, Vector3* image, int 
     progress += totalLines;
 }
 
-
-void render(const Scene& scene, const Camera& camera)
+void render(const Scene &scene, const Camera &camera)
 {
     const int width = camera.imgWidth;
     const int height = camera.imgHeight;
-    Vector3* image = new Vector3[width * height];
+    Vector3 *image = new Vector3[width * height];
 
     // Calculate region dimensions
     int regionWidth = width / numThreads;
@@ -89,20 +89,19 @@ void render(const Scene& scene, const Camera& camera)
         int startY = 0;
         int endY = height;
 
-        threads.emplace_back([startX, endX, startY, endY, &scene, &camera, &image, &progress, width]() {
-            renderRegion(scene, camera, image, startX, startY, endX, endY, width, progress);
-        });
+        threads.emplace_back([startX, endX, startY, endY, &scene, &camera, &image, &progress, width]()
+                             { renderRegion(scene, camera, image, startX, startY, endX, endY, width, progress); });
     }
 
-    // Wait for all threads to finish
-    for (auto& thread : threads)
+    // Wait for all threads to finish before writing to file
+    for (auto &thread : threads)
     {
         thread.join();
     }
 
     // Write to file
     std::ofstream ofs;
-    ofs.open("./out.ppm");
+    ofs.open("./output.ppm");
     ofs << "P3\n"
         << width << " " << height << "\n255\n";
     for (int j = height - 1; j >= 0; --j)
@@ -120,6 +119,7 @@ void render(const Scene& scene, const Camera& camera)
 
     delete[] image;
 
+    // console output
     std::cout << "Rendering completed!" << std::endl;
 }
 

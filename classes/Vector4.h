@@ -159,6 +159,7 @@ public:
         return Vector4(x * rhs.x, y * rhs.y, z * rhs.z, w * rhs.w);
     }
 
+// this function from https://stackoverflow.com/questions/30198520/class-with-union-use-of-deleted-function-on-constructor
     Vector4 operator*(const double &rhs) const
     {
         return Vector4(x * rhs, y * rhs, z * rhs, w * rhs);
@@ -173,7 +174,7 @@ public:
         this->w = w;
     }
 
-    // xyz
+    // get xyz
     Vector3 xyz() const
     {
         return Vector3(x, y, z);

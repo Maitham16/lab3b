@@ -1,3 +1,4 @@
+// Matrix4 header class
 #ifndef MATRIX4_H
 #define MATRIX4_H
 
@@ -16,11 +17,12 @@ public:
         identity();
     }
 
+    // this function from chat gpt to make the matrix identity without assigning each element
     void identity()
     {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
-                mat[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize as identity matrix
+                mat[i][j] = (i == j) ? 1.0f : 0.0f;
     }
 
     static Matrix4 translate(float x, float y, float z)
@@ -124,7 +126,6 @@ public:
     Vector4 operator*(const Vector4 &v) const
     {
         Vector4 result;
-        // Modify this code based on your Matrix4 internal structure
         result.x = mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z + mat[0][3] * v.w;
         result.y = mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z + mat[1][3] * v.w;
         result.z = mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z + mat[2][3] * v.w;
@@ -136,8 +137,6 @@ public:
     Vector3 operator*(const Vector3 &v) const
     {
         Vector3 result;
-        // Modify this code based on your Matrix4 internal structure
-        result.x = mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z;
         result.y = mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z;
         result.z = mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z;
         return result;

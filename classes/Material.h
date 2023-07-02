@@ -4,23 +4,25 @@
 #include "Vector3.h"
 #include "Texture.h"
 
-// interpolate
+// interpolate function (I moved it here because it won't to run if I put it in vector3.h)
 float interpolate(float t)
 {
   return t * t * (3.4 - 2.4 * t);
 }
 
+// Material structure (I implemented as a struct because it I don't need to use private variables)
 struct Material
 {
   Vector3 color;
-  float ka;       // Ambient coefficient
-  float kd;       // Diffuse coefficient
-  float ks;       // Specular coefficient
-  float exponent; // Specular exponent
+  float ka;
+  float kd;
+  float ks;
+  float exponent;
   float reflectance;
   float transmittance;
   float refraction_index;
   Texture *texture;
+  // this is for bump mapping
   Texture *bumpMap;
 
   Material(const Vector3 &color = Vector3(1.0, 1.0, 1.0), float ka = 0.3,
@@ -45,15 +47,16 @@ struct Material
     }
   }
 
+  // textureCoordinates function for texture mapping
   Vector2 textureCoordinates(const Vector3 &point) const
   {
     // Normalize the point to a unit sphere to calculate the spherical coordinates
     Vector3 normalizedPoint = point.normalized();
 
-    // Calculate the azimuthal angle (U coordinate) using the arctan2 function
+    // azimuthal angle (U coordinate)
     float azimuth = std::atan2(normalizedPoint.z, normalizedPoint.x);
 
-    // Calculate the polar angle (V coordinate) using the arcsin function
+    // polar angle (V coordinate)
     float polar = std::asin(normalizedPoint.y);
 
     // Map the azimuthal and polar angles to the range [0, 1] for the texture coordinates
@@ -67,6 +70,7 @@ struct Material
     return Vector2(u, v);
   }
 
+  // sample function for texture mapping (bumpping mapping)
   Vector3 bumpNormal(const Vector3 &position, const Vector3 &normal) const
   {
     if (bumpMap && bumpMap->isValid())
@@ -90,16 +94,16 @@ struct Material
     }
   }
 
+  // getTangentSpace function for bump mapping
   void getTangentSpace(const Vector3 &position, Vector3 &tangent, Vector3 &bitangent) const
   {
-    // The tangent is aligned with the U texture coordinate
+    // tangent is aligned with the U texture coordinate
     Vector3 tangentDirection(1.0f, 0.0f, 0.0f);
 
-    // The bitangent is aligned with the V texture coordinate
+    // bitangent is aligned with the V texture coordinate
     Vector3 bitangentDirection(0.0f, 1.0f, 0.0f);
 
     // Transform the tangent and bitangent to world space
-    // Here we'll just assume they're already in world space
     tangent = tangentDirection;
     bitangent = bitangentDirection;
   }

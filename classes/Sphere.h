@@ -19,6 +19,7 @@ public:
     Sphere(const Vector3 &center, float radius, const Material &material)
         : center(center), radius(radius), material(material) {}
 
+// sphere intersect function
     bool intersect(const Ray &ray, float &t) const
     {
         Vector3 oc = ray.origin - center;
@@ -48,6 +49,7 @@ public:
             return false;
         }
     }
+
     // default constructor
     Sphere()
     {

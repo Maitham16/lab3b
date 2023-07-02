@@ -486,11 +486,11 @@ int main()
 
     scene.camera.transform.makeTranslation(-1.0, 1.0, 3.0);
 
-    scene.camera.isTransform = true;
+    scene.camera.isTransform = false;
     scene.camera.dof = false;
 
     // Create a spotlight
-    Vector3 position(0.0, 3.0, -3.0);
+    Vector3 position(0.0, 3.0, -2.0);
     Vector3 direction = (scene.spheres[0].center - position).normalized();
     double angle = 10.0;
     Vector3 color(0.7, 0.7, 0.7);

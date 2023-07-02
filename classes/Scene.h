@@ -1,7 +1,9 @@
+// scene header class
 #ifndef SCENE_H
 #define SCENE_H
 
 #include <vector>
+
 #include "Sphere.h"
 #include "Light.h"
 #include "Model.h"
@@ -37,11 +39,13 @@ public:
         camera = cam;
     }
 
+    // spotlight function to add a spotlight to the scene
     void addSpotlight(const Spotlight &spotlight)
     {
         spotlights.push_back(spotlight);
     }
 
+    // scene intersect function
     bool intersect(const Ray &ray, float &t, Vector3 &point, Vector3 &normal, Material &material) const
     {
         for (const auto &sphere : spheres)
@@ -78,25 +82,23 @@ public:
         return t < std::numeric_limits<float>::max();
     }
 
+    // scene compute lighting function
     Vector3 computeLighting(const Vector3 &point, const Vector3 &normal, const Vector3 &viewDirection, double specular) const
     {
         Vector3 result = Vector3(0, 0, 0);
         for (const Spotlight &spotlight : spotlights)
         {
             Vector3 lightColor = spotlight.getLighting(point);
-            // Incorporate the effects of this light into the overall lighting
-            // This code will depend on your specific shading model
-            // For example, using the Phong reflection model, it might look something like this:
             Vector3 lightDirection = (spotlight.position - point).normalize();
             double cosTheta = normal.dot(lightDirection);
             if (cosTheta > 0)
             {
-                result += lightColor * cosTheta; // Diffuse term
+                result += lightColor * cosTheta;
                 Vector3 reflectionDirection = (2 * cosTheta * normal - lightDirection).normalize();
                 double cosAlpha = viewDirection.dot(reflectionDirection);
                 if (cosAlpha > 0)
                 {
-                    result += lightColor * pow(cosAlpha, specular); // Specular term
+                    result += lightColor * pow(cosAlpha, specular);
                 }
             }
         }

@@ -65,20 +65,19 @@ public:
             {
                 std::istringstream s(line.substr(2));
                 int a, b, c;
-                int aT, bT, cT; // Texture indices
-                int aN, bN, cN; // Normal indices
+                int aT, bT, cT;
+                int aN, bN, cN;
 
-                char ch; // Used to skip over slashes
+                char ch;
 
                 // Parsing faces with vertex, texture, and normal indices
                 s >> a >> ch >> aT >> ch >> aN;
                 s >> b >> ch >> bT >> ch >> bN;
                 s >> c >> ch >> cT >> ch >> cN;
 
-                // console check
+                // console checking
                 std::cout << "Face: " << a << " " << b << " " << c << std::endl;
-                // Here we have to create a new Triangle structure which can take the texture and normal indices into account
-                // Also, depending on your specific implementation, you might need to pass these as references or pointers, not by value
+                // create triangle with texture and normal if the material has texture and normal map
                 if (material.texture)
                 {
                     triangles.push_back(Triangle(vertices[a - 1], vertices[b - 1], vertices[c - 1],
@@ -96,11 +95,13 @@ public:
         }
     }
 
+    // function to get the transform
     const Transform &getTransform() const
     {
         return transform;
     }
 
+    // function to set the transform
     void setTransform(const Transform &transform)
     {
         this->transform = transform;
