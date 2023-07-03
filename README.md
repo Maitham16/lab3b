@@ -28,7 +28,21 @@ Effects:
 Bonus:
 B6: antialiasing using supersampling: fully implemented.
 
-
+Execution Remarks
+--------------------------------------------------------------------------------
+- The present execution remarks delineate the advancements made in response to 
+the previous feedback. All assigned tasks have been successfully integrated into
+a the main function. Upon executing the code, the user will be prompted to input 
+a number ranging from 1 to 9, corresponding to the exampleN.xml file, where N 
+denotes a digit from 1 to 9. 
+- Additionally, users are required to indicate their preference regarding turn
+on/off camera transformations, and camera lens.
+- Please make sure to type y or n to get the expected output.
+- Please turn on/off the spotlight from the main function by changing the value
+  of isSpotlight true/false, I have set it to false by default.
+- if you receive (Segmentation fault (core dumped)), please try
+  again. That is maybe because I have not dealt with memory management well.
+  Once, the operations are quick that happens.
 
 Tested Environments
 --------------------------------------------------------------------------------
@@ -44,11 +58,12 @@ Resources
 --------------------------------------------------------------------------------
 1. scenes examples folder from course website.
 2. pugixml library from https://pugixml.org/
-3. 
+3. https://stackoverflow.com/questions/30198520/class-with-union-use-of-deleted-function-on-constructor
 
 Additional and General Remarks
 --------------------------------------------------------------------------------
-1. I utilized ChatGPT to check errors codes, and to solve them.
+1. I utilized ChatGPT to check errors codes, and to solve them. Also, I pasted some functions for corrections.
 2. I searched the internet to resolve errors and I got numerous ideas that I applied into my code.
 3. Several ideas from youtube's tutorials are applied into my project.
+4. No direct code copied but I commented when I get the same function structure from the internet.
 ================================================================================
